@@ -5,6 +5,7 @@ import json
 import HTMLParser
 
 from ..items import WechatItem
+from ..items import WechatPubItem
 
 
 class WeichatSpider(scrapy.Spider):
@@ -37,7 +38,7 @@ class WeichatSpider(scrapy.Spider):
     name = "wechat"
     allowed_domains = ["mp.weixin.qq.com", "weixin.sogou.com"]
 
-    pub_ids = ['childforge', 'hantopedu']
+    pub_ids = ['hantopedu']
     sogou_search_pub_uri = 'http://weixin.sogou.com/weixin?type=1&s_from=input&query={{ pub_id }}&ie=utf8&_sug_=n&_sug_type_='
     wechat_base_url = 'https://mp.weixin.qq.com'
 
@@ -72,13 +73,29 @@ class WeichatSpider(scrapy.Spider):
         从微信公号最新 10 篇文章页面中得到 10 篇文章的信息，并得到内容页的 url
         """
 
+        # todo save wechatPubInfo
+
+        # source = WechatPubItem
+        # source['name'] =
+        # source['qrcode'] =
+        # source['logo'] =
+        # source['info'] =
+        # source['organization'] =
+
+        author = response.xpath("//div[@class='profile_info']/strong[@class='profile_nickname']/text()").extract_first()
+        if author is None:
+            # @todo 触发了验证码的情况
+            pass
+        else:
+            author = author.strip()
+
         script_block = response.xpath("//script[contains(text(),'document.domain=')]")
-        content = script_block.re(r'msgList\s*=\s*{"list":(.*)};')
+        lists = script_block.re(r'msgList\s*=\s*{"list":(.*)};')
         biz = script_block.re(r'var\s*biz\s*=\s*"(.*?)\"')
 
-        if content:
-            content = content[0]
-            lists = json.loads(content)
+        if lists:
+            lists = lists[0]
+            lists = json.loads(lists)
         else:
             lists = []
             print "some thing error when get list from js block"
@@ -92,18 +109,21 @@ class WeichatSpider(scrapy.Spider):
         html_parser = HTMLParser.HTMLParser()
 
         if lists:
+            lists = self.format_list(lists)
+            print lists
 
             for article in lists:
                 item = WechatItem()
-                item["title"] = article["app_msg_ext_info"]["title"]
-                item["author"] = article["app_msg_ext_info"]["author"]
-                item["thumb"] = article["app_msg_ext_info"]["cover"]
-                item["digest"] = article["app_msg_ext_info"]["digest"]
-                item["datetime"] = article["comm_msg_info"]["datetime"]
-                item["copyright_stat"] = article["app_msg_ext_info"]["copyright_stat"]
+                item["title"] = article["title"]
+                item["author"] = article["author"] if article["author"] else author
+                item["thumb"] = article["thumb"]
+                item["digest"] = article["digest"]
+                item["datetime"] = article["datetime"]
+                item["idx"] = article["idx"]
+                item["copyright_stat"] = article["copyright_stat"]
                 item["biz"] = biz
 
-                url = self.wechat_base_url + article["app_msg_ext_info"]["content_url"]
+                url = self.wechat_base_url + article["url"]
                 url = html_parser.unescape(url)
 
                 yield scrapy.Request(url, callback=self.parse_article, meta={'item': item})
@@ -116,3 +136,36 @@ class WeichatSpider(scrapy.Spider):
         item["content"] = response.xpath("//div[@id='js_content']").extract_first()
 
         yield item
+
+    # 微信内容块需要格式化，否则会漏掉多篇文章的部分
+    def format_list(self, lists):
+        new_list = []
+        for article in lists:
+            datetime = article["comm_msg_info"]["datetime"]
+            data = {
+                       "title": article["app_msg_ext_info"]["title"],
+                       "author": article["app_msg_ext_info"]["author"],
+                       "thumb": article["app_msg_ext_info"]["cover"],
+                       "digest": article["app_msg_ext_info"]["digest"],
+                       "copyright_stat": article["app_msg_ext_info"]["copyright_stat"],
+                       "url": article["app_msg_ext_info"]["content_url"],
+                       "idx": article["app_msg_ext_info"]['fileid'],
+                       "datetime": datetime
+                      }
+            
+            new_list.append(data)
+
+            if article['app_msg_ext_info']['is_multi']:
+                for sub_article in article['app_msg_ext_info']['multi_app_msg_item_list']:
+                    data = {
+                                "title": sub_article["title"],
+                                "author": sub_article["author"],
+                                "thumb": sub_article["cover"],
+                                "digest": sub_article["digest"],
+                                "copyright_stat": sub_article["copyright_stat"],
+                                "url": sub_article["content_url"],
+                                "idx": sub_article['fileid'],
+                                "datetime": datetime
+                                }
+                    new_list.append(data)
+        return new_list

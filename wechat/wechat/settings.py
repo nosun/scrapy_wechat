@@ -67,7 +67,8 @@ DOWNLOADER_MIDDLEWARES = {
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'wechat.pipelines.WechatPipeline': 300,
-    'wechat.pipelines.MongoPipeline': 400,
+    # 'wechat.pipelines.MongoStorePipeline': 400,
+    'wechat.pipelines.MysqlStorePipeline': 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -95,5 +96,10 @@ ITEM_PIPELINES = {
 MONGO_URI = 'mongodb://127.0.0.1:27017'
 MONGO_DATABASE = 'items'
 DOWNLOAD_DELAY = 5
-IMAGES_STORE = '/Users/nosun/data/python/scrapy/wechat/wechat/pics'
+IMAGES_STORE = ''
+
+MYSQL_HOST = 'localhost'
+MYSQL_DBNAME = ''
+MYSQL_USER = ''
+MYSQL_PASSWD = ''
 
