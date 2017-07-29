@@ -236,8 +236,8 @@ class TestCase():
      def test_deal_content_image(self):
          pipeline = DealContentImagePipeline()
          cur_path = os.path.dirname(os.path.realpath(__file__))
-         file_src = os.path.join(cur_path, '_resource/thefile.html')
-         file_dst = os.path.join(cur_path, '../thefile.html')
+         file_src = os.path.join(cur_path, '_resource/src.html')
+         file_dst = os.path.join(cur_path, '_resource/dst.html')
          f = open(file_src, "r")
          content = pipeline.dealContent(f.read())
          f.close()
