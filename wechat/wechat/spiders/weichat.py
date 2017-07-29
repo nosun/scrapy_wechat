@@ -112,7 +112,7 @@ class WeichatSpider(scrapy.Spider):
 
         if lists:
             lists = self.format_list(lists)
-            print lists
+            # print lists
 
             for article in lists:
                 item = WechatItem()

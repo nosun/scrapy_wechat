@@ -12,17 +12,57 @@ from twisted.enterprise import adbapi
 import hashlib
 import time
 import scrapy
+import logging
+import re
 from bs4 import BeautifulSoup
 from scrapy.pipelines.images import ImagesPipeline
+import os.path
 from scrapy.exceptions import DropItem
 
-import os
-
-from settings import IMAGES_STORE
-
-class WechatPipeline(object):
+class DealContentImagePipeline(object):
+    
     def process_item(self, item, spider):
+        item['content'] = self.dealContent(item['content'])
         return item
+
+    def dealContent(self, content):
+        soup = BeautifulSoup(content, "lxml")
+    
+        # replace img attr data-src to src
+        for image in soup.find_all('img'):
+            src = image.get('data-src')
+            del image['data-src']
+            image['src'] = src
+    
+        # delete style
+        for elem in soup.findAll(['p', 'span', 'section', 'h2', 'h3', 'h4', 'img']):
+            del elem['style']
+            
+    
+        for elem in soup.findAll(['a']):
+            elem.extract()
+            
+        content = str(soup)
+    
+        # last remove html body
+        content = self.bs_preprocess(content)
+        patterns = ['<html>', '<body>', '</html>', '</body>', '<br/>', '<span></span>',
+                    '<strong></strong>', '<p></p>']
+    
+        for pattern in patterns:
+            content = content.replace(pattern, '')
+    
+        return content
+
+    def bs_preprocess(self, content):
+        """remove distracting whitespaces and newline characters"""
+        pat = re.compile('(^[\s]+)|([\s]+$)', re.MULTILINE)
+        content = re.sub(pat, '', content)  # remove leading and trailing whitespaces
+        content = re.sub('\n', ' ', content)  # convert newlines to spaces
+        # this preserves newline delimiters
+        content = re.sub('[\s]+<', '<', content)  # remove whitespaces before opening tags
+        content = re.sub('>[\s]+', '>', content)  # remove whitespaces after closing tags
+        return content
 
 
 class SaveThumbPipeline(ImagesPipeline):
@@ -37,10 +77,11 @@ class SaveThumbPipeline(ImagesPipeline):
         print results
         # 判断 src 是缩略图还是 内容中的图片，并各自保存。
         image_paths = [x['path'] for ok, x in results if ok]
-        print image_paths
         
         if image_paths:
             item['thumb'] = image_paths[0]
+            
+        logging.DEBUG("finished get Thumb")
         return item
     
 
@@ -79,15 +120,7 @@ class SaveContentImagesPipeline(ImagesPipeline):
                 url_new = base_url + res['path']
                 item['content'] = item['content'].replace(url, url_new)
         
-        soup = BeautifulSoup(item['content'])
-
-        # replace img attr data-src to src
-        for image in soup.find_all('img'):
-            src = image.get('data-src')
-            del image['data-src']
-            image['src'] = src
-            
-        item['content'] = soup
+        logging.DEBUG("finished get images")
         return item
 
 
@@ -160,9 +193,8 @@ class MysqlStorePipeline(object):
         if ret:
             aid = ret['id']  # article id from fetch info
             sql = """update wx_article set title = %s, digest = %s, author = %s, thumb = %s,
-                                           datetime = %s, copyright_stat = %s, biz = %s, idx = %s
-                                           status = %s, created_at = %s,
-                     where id = %s"""
+                                           datetime = %s, copyright_stat = %s, biz = %s, idx = %s,
+                                           status = %s, created_at = %s where id = %s"""
             params = (item['title'], item['digest'], item['author'], item['thumb'], item['datetime'],
                       item['copyright_stat'], item['biz'], item['idx'], 0, now, aid)
             conn.execute(sql, params)
@@ -184,7 +216,8 @@ class MysqlStorePipeline(object):
 
             # insert article content data
             aid = conn.lastrowid
-            print aid
+            # print aid
+            # print item['content']
             sql = """insert into wx_article_data (id, content) values (%s, %s)"""
             params = (aid, item['content'])
             conn.execute(sql, params)
@@ -197,3 +230,22 @@ class MysqlStorePipeline(object):
     # 异常处理
     def _handle_error(self, failue, item, spider):
         print failue
+        
+class TestCase():
+    
+     def test_deal_content_image(self):
+         pipeline = DealContentImagePipeline()
+         cur_path = os.path.dirname(os.path.realpath(__file__))
+         file_src = os.path.join(cur_path, '_resource/thefile.html')
+         file_dst = os.path.join(cur_path, '../thefile.html')
+         f = open(file_src, "r")
+         content = pipeline.dealContent(f.read())
+         f.close()
+         d = open(file_dst, "w")
+         d.write(content)
+         d.close()
+         
+
+if __name__ == '__main__':
+    man = TestCase()
+    man.test_deal_content_image()

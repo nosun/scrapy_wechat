@@ -28,15 +28,18 @@ class DB_Helper():
 		conn = self.connectMysql()
 		sql = "select * from wx_article wa INNER JOIN wx_article_data wxd on wa.id = wxd.id limit 1"
 		cur = conn.cursor()
-		cur.execute(sql)  # 执行sql语句
-		d = cur.fetchone()
-		cur.close()
-		conn.close()
-		return d
-
-	# 异常处理
-	def _handle_error(self, failue, item, spider):
-		print failue
+		try:
+			cur.execute(sql)  # 执行sql语句
+			d = cur.fetchone()
+			cur.close()
+			conn.close()
+			return d
+		except MySQLdb.Error, e:
+			try:
+				sql_error = "Error %d:%s" % (e.args[0], e.args[1])
+				print sql_error
+			except IndexError:
+				print "MySQL Error:%s" % str(e)
 
 if __name__ == "__main__":
 	db_helper = DB_Helper()

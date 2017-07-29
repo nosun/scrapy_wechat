@@ -33,7 +33,8 @@ ROBOTSTXT_OBEY = False
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -95,7 +96,7 @@ ITEM_PIPELINES = {
 
 MONGO_URI = 'mongodb://127.0.0.1:27017'
 MONGO_DATABASE = 'items'
-DOWNLOAD_DELAY = 5
+DOWNLOAD_DELAY = 2
 IMAGES_STORE = ''
 
 MYSQL_HOST = 'localhost'
