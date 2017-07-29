@@ -11,6 +11,11 @@ import MySQLdb.cursors
 from twisted.enterprise import adbapi
 import hashlib
 import time
+import scrapy
+from bs4 import BeautifulSoup
+from scrapy.pipelines.images import ImagesPipeline
+from scrapy.exceptions import DropItem
+
 import os
 
 from settings import IMAGES_STORE
@@ -19,34 +24,71 @@ class WechatPipeline(object):
     def process_item(self, item, spider):
         return item
 
-class WechatDownPicturePipeline(object):
 
-    def process_item(self, item, spider):
-
-        """
-        item.thumb url 中的图片，保存并替换 url
-        item.content 中的图片，保存并替换
-        图片的日期，以文章的发布日期为目录，md5 随机生成名字，进行存储
-        """
-
-        fold_name = "".join(item['title'])
-
+class SaveThumbPipeline(ImagesPipeline):
+    """
+    item.thumb url 中的图片，保存并替换 url
+    """
+    def get_media_requests(self, item, info):
+        if item['thumb']:
+            yield scrapy.Request(item['thumb'])
+    
+    def item_completed(self, results, item, info):
+        print results
+        # 判断 src 是缩略图还是 内容中的图片，并各自保存。
+        image_paths = [x['path'] for ok, x in results if ok]
+        print image_paths
+        
+        if image_paths:
+            item['thumb'] = image_paths[0]
         return item
+    
 
-    def saveThumb(self, url):
+class SaveContentImagesPipeline(ImagesPipeline):
+    
+    """
+    item.content 中的图片，保存并替换
+    图片的日期，以文章的发布日期为目录，md5 随机生成名字，进行存储
+    """
+    
+    def get_media_requests(self, item, info):
+        # 提取 content 中的图片 url
+        if item['content']:
+            soup = BeautifulSoup(item['content'])
+            
+            image_urls = [img.get('data-src') for img in soup.find_all("img")]
+            for image_url in image_urls:
+                yield scrapy.Request(image_url)
 
-        pass
+    def item_completed(self, results, item, info):
+        
+        # 返回的数据格式
+        # [(True,
+        #  {'checksum': '2b00042f7481c7b056c4b410d28f33cf',
+        #   'path': 'full/0a79c461a4062ac383dc4fade7bc09f1384a3910.jpg',
+        #   'url': 'http://www.example.com/files/product1.pdf'}),
+        # (False,
+        #  Failure(...))]
+        
+        base_url = "/images/"
+        
+        # replace old image url to new image url
+        for ok, res in results:
+            if ok:
+                url = res['url']
+                url_new = base_url + res['path']
+                item['content'] = item['content'].replace(url, url_new)
+        
+        soup = BeautifulSoup(item['content'])
 
-    def saveContentImage(self, content):
-
-        pass
-
-
-
-    def mkdir(self):
-
-        pass
-
+        # replace img attr data-src to src
+        for image in soup.find_all('img'):
+            src = image.get('data-src')
+            del image['data-src']
+            image['src'] = src
+            
+        item['content'] = soup
+        return item
 
 
 class MongoStorePipeline(object):

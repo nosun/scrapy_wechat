@@ -3,6 +3,7 @@
 import scrapy
 import json
 import HTMLParser
+import logging
 
 from ..items import WechatItem
 from ..items import WechatPubItem
@@ -84,6 +85,7 @@ class WeichatSpider(scrapy.Spider):
 
         author = response.xpath("//div[@class='profile_info']/strong[@class='profile_nickname']/text()").extract_first()
         if author is None:
+            logging.warning("suffer captcha case")
             # @todo 触发了验证码的情况
             pass
         else:
