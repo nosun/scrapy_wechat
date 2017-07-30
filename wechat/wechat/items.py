@@ -20,6 +20,7 @@ class WechatItem(scrapy.Item):
     digest = scrapy.Field()   # 摘要
     content = scrapy.Field()  # 正文
     biz = scrapy.Field()      # 公众号标识 MzI5NjI3MzU4Mw==
+    wid = scrapy.Field()      # 公众号 id
     datetime = scrapy.Field()  # 发布日期   2017-02-1
     idx = scrapy.Field()      # 位置  index
     copyright_stat = scrapy.Field()  # 原创声明 11（原创），111（转载），100（不明确）D
@@ -28,7 +29,7 @@ class WechatItem(scrapy.Item):
 
     pass
 
-class WechatPubItem(scrapy.Item):
+class WechatSourceItem(scrapy.Item):
     """
     微信公众号信息
     """
@@ -36,9 +37,10 @@ class WechatPubItem(scrapy.Item):
     # name = scrapy.Field()
 
     name = scrapy.Field()      # 名称
+    wid = scrapy.Field()       # 微信 id
     qrcode = scrapy.Field()    # 二维码
     logo = scrapy.Field()      # Logo
-    info = scrapy.Field()      # 简介
+    description = scrapy.Field()      # 简介
     organization = scrapy.Field()  # 组织
 
     pass

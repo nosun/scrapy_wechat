@@ -6,10 +6,9 @@ import HTMLParser
 import logging
 
 from ..items import WechatItem
-from ..items import WechatPubItem
 
 
-class WeichatSpider(scrapy.Spider):
+class WechatSpider(scrapy.Spider):
     """
 
     需要有一个公众号的 id 清单，拼接到搜狗微信 search 的 url 中，通过请求，得到 "微信公号前十篇" 的 url，通过解析前十篇页面，得到内容页的链接，并进行爬取。
@@ -38,8 +37,15 @@ class WeichatSpider(scrapy.Spider):
 
     name = "wechat"
     allowed_domains = ["mp.weixin.qq.com", "weixin.sogou.com"]
+    
+    custom_settings = {
+        'ITEM_PIPELINES': {
+             'wechat.pipelines.FormatArticleContentPipeline': 10,
+             'wechat.pipelines.StoreArticlePipeline': 400,
+        }
+    }
 
-    pub_ids = ['hantopedu']
+    wids = ['hantopedu']
     sogou_search_pub_uri = 'http://weixin.sogou.com/weixin?type=1&s_from=input&query={{ pub_id }}&ie=utf8&_sug_=n&_sug_type_='
     wechat_base_url = 'https://mp.weixin.qq.com'
 
@@ -49,10 +55,10 @@ class WeichatSpider(scrapy.Spider):
         从数据库中获取需要爬取的公众号的 id ，通过拼接得到搜狗搜索 公号 的结果页面，从结果页面取出第一条信息，并得到微信公号临时页面
         :return:
         """
-        for pub_id in self.pub_ids:
-            url = self.sogou_search_pub_uri.replace('{{ pub_id }}', pub_id)
+        for wid in self.wids:
+            url = self.sogou_search_pub_uri.replace('{{ wid }}', wid)
             print(url)
-            yield scrapy.Request(url, callback=self.parse_search_res)
+            yield scrapy.Request(url, callback=self.parse_search_res, meta={'wid': wid})
 
 
     def parse_search_res(self, response):
@@ -62,27 +68,19 @@ class WeichatSpider(scrapy.Spider):
         :return:
         """
 
+        wid = response.meta['wid']
         url = response.xpath("//div[@class='img-box'][1]/a/attribute::href").extract_first()
 
         print(url)
 
         if url:
-            yield scrapy.Request(url, callback=self.parse_list)
+            yield scrapy.Request(url, callback=self.parse_list, meta={'wid': wid})
 
     def parse_list(self, response):
         """
         从微信公号最新 10 篇文章页面中得到 10 篇文章的信息，并得到内容页的 url
         """
-
-        # todo save wechatPubInfo
-
-        # source = WechatPubItem
-        # source['name'] =
-        # source['qrcode'] =
-        # source['logo'] =
-        # source['info'] =
-        # source['organization'] =
-
+        wid = response.meta['wid']
         author = response.xpath("//div[@class='profile_info']/strong[@class='profile_nickname']/text()").extract_first()
         if author is None:
             logging.warning("suffer captcha case")
@@ -124,6 +122,7 @@ class WeichatSpider(scrapy.Spider):
                 item["idx"] = article["idx"]
                 item["copyright_stat"] = article["copyright_stat"]
                 item["biz"] = biz
+                item["wid"] = wid
 
                 url = self.wechat_base_url + article["url"]
                 url = html_parser.unescape(url)
@@ -140,7 +139,8 @@ class WeichatSpider(scrapy.Spider):
         yield item
 
     # 微信内容块需要格式化，否则会漏掉多篇文章的部分
-    def format_list(self, lists):
+    @staticmethod
+    def format_list(lists):
         new_list = []
         for article in lists:
             datetime = article["comm_msg_info"]["datetime"]
