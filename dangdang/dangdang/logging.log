@@ -1,0 +1,31 @@
+2020-11-22 01:20:21 [scrapy.utils.log] INFO: Scrapy 1.4.0 started (bot: dangdang)
+2020-11-22 01:20:21 [scrapy.utils.log] INFO: Overridden settings: {'BOT_NAME': 'dangdang', 'COOKIES_ENABLED': False, 'DOWNLOAD_DELAY': 1, 'DUPEFILTER_CLASS': 'scrapy.dupefilters.BaseDupeFilter', 'LOGSTATS_INTERVAL': 0, 'LOG_ENABLED': False, 'LOG_FILE': 'logging.log', 'NEWSPIDER_MODULE': 'dangdang.spiders', 'SPIDER_MODULES': ['dangdang.spiders'], 'USER_AGENT': 'dangdang (+http://www.yourdomain.com)'}
+2020-11-22 01:20:21 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.memusage.MemoryUsage']
+2020-11-22 01:20:21 [scrapy.middleware] INFO: Enabled downloader middlewares:
+['dangdang.middlewares.RandomUserAgentMiddleware',
+ 'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
+ 'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
+ 'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
+ 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware',
+ 'dangdang.middlewares.DangdangDownloaderMiddleware',
+ 'scrapy.downloadermiddlewares.retry.RetryMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware',
+ 'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.RedirectMiddleware',
+ 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
+ 'scrapy.downloadermiddlewares.stats.DownloaderStats']
+2020-11-22 01:20:21 [scrapy.middleware] INFO: Enabled spider middlewares:
+['scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
+ 'scrapy.spidermiddlewares.offsite.OffsiteMiddleware',
+ 'dangdang.middlewares.DangdangSpiderMiddleware',
+ 'scrapy.spidermiddlewares.referer.RefererMiddleware',
+ 'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
+ 'scrapy.spidermiddlewares.depth.DepthMiddleware']
+2020-11-22 01:20:21 [scrapy.middleware] INFO: Enabled item pipelines:
+['dangdang.pipelines.DangdangPipeline']
+2020-11-22 01:20:27 [scrapy.core.engine] INFO: Spider opened
+2020-11-22 01:20:27 [default] INFO: Spider opened: default
+2020-11-22 01:20:27 [default] INFO: Spider opened: default
+2020-11-22 01:20:27 [scrapy.core.engine] DEBUG: Crawled (200) <GET http://product.dangdang.com/24008607.html> (referer: https://www.dangdang.com)

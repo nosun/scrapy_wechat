@@ -2,3 +2,5 @@
 *.pyc
 .DS_Store
 wechat/wechat/settings_dev.py
+_images/
+_logs/

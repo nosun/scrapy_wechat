@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for xiaoshuo project
+# Scrapy settings for zhenyan project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,32 +9,28 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-from os import path
+BOT_NAME = 'zhenyan'
 
-SETTING_DIR = path.dirname(path.realpath(__file__))
-
-BOT_NAME = 'xiaoshuo'
-
-SPIDER_MODULES = ['xiaoshuo.spiders']
-NEWSPIDER_MODULE = 'xiaoshuo.spiders'
+SPIDER_MODULES = ['zhenyan.spiders']
+NEWSPIDER_MODULE = 'zhenyan.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'xiaoshuo (+http://www.yourdomain.com)'
+#USER_AGENT = 'zhenyan (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 16
+CONCURRENT_REQUESTS = 1
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0
+DOWNLOAD_DELAY = 30
 # The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 16
-CONCURRENT_REQUESTS_PER_IP = 16
+#CONCURRENT_REQUESTS_PER_DOMAIN = 16
+#CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
@@ -51,13 +47,13 @@ COOKIES_ENABLED = False
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-   'xiaoshuo.middlewares.XiaoshuoSpiderMiddleware': 543,
+   #'zhenyan.middlewares.ZhenyanSpiderMiddleware': 543,
 }
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-        'xiaoshuo.middlewares.CustomUserAgentMiddleware': 543,
+   'zhenyan.middlewares.CustomUserAgentMiddleware': 540,
 }
 
 # Enable or disable extensions
@@ -69,20 +65,20 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'xiaoshuo.pipelines.StoreNovelPipeline': 300,
-    #'xiaoshuo.pipelines.StoreNovelChapterPipeline': 310,
+   # 'zhenyan.pipelines.StoreAuthorPipeline': 300,
+   # 'zhenyan.pipelines.StoreContentPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-AUTOTHROTTLE_START_DELAY = 3
+#AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
-AUTOTHROTTLE_MAX_DELAY = 20
+#AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+#AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 #AUTOTHROTTLE_DEBUG = False
 
@@ -94,12 +90,7 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-
-IMAGES_PATH = path.join(SETTING_DIR, '_images')
-LOG_PATH = path.join(SETTING_DIR, '_logs')
-
-# mysql config
 MYSQL_HOST = 'localhost'
-MYSQL_DBNAME = 'weishuo'
+MYSQL_DBNAME = 'zhenyan'
 MYSQL_USER = 'root'
 MYSQL_PASSWD = 'rensheng'
