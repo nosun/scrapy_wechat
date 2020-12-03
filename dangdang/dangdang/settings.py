@@ -20,12 +20,13 @@ USER_AGENT = 'dangdang (+http://www.yourdomain.com)'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
-# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-# SCHEDULER_PERSIST = True #不清理Redis队列
-# SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderQueue"    #队列
-# REDIS_HOST = 'localhost'
-# REDIS_PORT = 6379
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+SCHEDULER_PERSIST = True  # 不清理Redis队列
+SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.SpiderQueue"  # 队列
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_PARAMS = {'db': 12}
 
 MONGODB_HOST = '127.0.0.1'
 MONGODB_PORT = 27017
@@ -51,41 +52,41 @@ TELNETCONSOLE_ENABLED = True
 
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
-	'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-	'Accept-Language': "zh-CN,zh;q=0.8",
-	"Accept-Encoding": "gzip, deflate",
-	"Connection": "keep-alive",
-	"Host": "baidu.com",
-	"Referer": "https://www.dangdang.com",
-	"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36",
-	"Origin": "http://baidu.com",
-	'Upgrade-Insecure-Requests': '1',
-	'Content-Type': 'application/x-www-form-urlencoded'
+    'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    'Accept-Language': "zh-CN,zh;q=0.8",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "keep-alive",
+    "Host": "baidu.com",
+    "Referer": "https://www.dangdang.com",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36",
+    "Origin": "http://baidu.com",
+    'Upgrade-Insecure-Requests': '1',
+    'Content-Type': 'application/x-www-form-urlencoded'
 }
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-	'dangdang.middlewares.DangdangSpiderMiddleware': 543,
+    'dangdang.middlewares.DangdangSpiderMiddleware': 543,
 }
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-	'dangdang.middlewares.RandomUserAgentMiddleware': 100,
-	'dangdang.middlewares.DangdangDownloaderMiddleware': 543,
+    'dangdang.middlewares.RandomUserAgentMiddleware': 100,
+    'dangdang.middlewares.DangdangDownloaderMiddleware': 543,
 }
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
 EXTENSIONS = {
-	'scrapy.extensions.telnet.TelnetConsole': None,
+    'scrapy.extensions.telnet.TelnetConsole': None,
 }
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-	'dangdang.pipelines.DangdangPipeline': 300,
+    'dangdang.pipelines.DangdangPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
